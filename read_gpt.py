@@ -9,7 +9,7 @@ def leer_hoja_gpt():
     ]
 
     # ✅ Leer directamente desde el archivo agente-atco.json
-    creds = ServiceAccountCredentials.from_json_keyfile_name("agente-atco.json", scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name("/etc/secrets/agente-atco.json", scope)
     client = gspread.authorize(creds)
 
     # Abre el documento y la pestaña
