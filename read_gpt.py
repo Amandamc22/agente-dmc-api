@@ -1,6 +1,4 @@
 import gspread
-import json
-import os
 from oauth2client.service_account import ServiceAccountCredentials
 
 def leer_hoja_gpt():
@@ -10,18 +8,8 @@ def leer_hoja_gpt():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    # Leer el contenido de la variable de entorno
-    cred_json = os.getenv("GOOGLE_SHEETS_CREDENTIALS")
-    if not cred_json:
-        raise Exception("❌ No se encontró la variable 'GOOGLE_SHEETS_CREDENTIALS'.")
-
-    try:
-        # Convertir string JSON a diccionario
-        cred_data = json.loads(cred_json)
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(cred_data, scope)
-    except Exception as e:
-        raise Exception(f"❌ Error al procesar la credencial JSON: {e}")
-
+    # ✅ Leer directamente desde el archivo agente-atco.json
+    creds = ServiceAccountCredentials.from_json_keyfile_name("agente-atco.json", scope)
     client = gspread.authorize(creds)
 
     # Abre el documento y la pestaña
