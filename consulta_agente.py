@@ -1,26 +1,54 @@
-import unicodedata
+def buscar_productos(clave_producto, datos):
+    coincidencias = []
 
-def normalizar(texto):
-    if not isinstance(texto, str):
-        return ""
-    texto = texto.lower()
-    texto = unicodedata.normalize('NFD', texto).encode('ascii', 'ignore').decode('utf-8')
-    return texto
+    clave_lower = clave_producto.lower()
 
-def buscar_productos(consulta, data):
-    consulta_norm = normalizar(consulta)
-    resultados = []
+    for item in datos:
+        campos = [
+            item.get("NOMBRE", ""),
+            item.get("NOMBRE WEB", ""),
+            item.get("ALIAS", ""),
+            item.get("CODIGO", "")
+        ]
+        campos_texto = " ".join([str(c).lower() for c in campos])
 
-    for item in data:
-        nombre = normalizar(item.get("NOMBRE", ""))
-        nombre_web = normalizar(item.get("NOMBRE WEB", ""))
-        alias = normalizar(item.get("ALIAS", ""))
-        codigo = normalizar(item.get("CODIGO", ""))
+        if clave_lower in campos_texto:
+            coincidencias.append(item)
 
-        if (consulta_norm in nombre or
-            consulta_norm in nombre_web or
-            consulta_norm in alias or
-            consulta_norm in codigo):
-            resultados.append(item)
+    return coincidencias
 
-    return resultados
+
+def responder_consulta(producto, tipo_dato):
+    claves = {
+        "precio": "PVP",
+        "stock": "STOCK",
+        "descripcion": "DESCRIPCION",
+        "rendimiento": "RENDIMIENTO"
+    }
+
+    clave = claves.get(tipo_dato)
+    if not clave or clave not in producto:
+        return "❌ No se puede responder esa consulta."
+
+    return f"✅ {tipo_dato.capitalize()} del producto '{producto['NOMBRE']}': {producto[clave]}"
+
+
+def responder_varias_coincidencias(productos, tipo_dato):
+    claves = {
+        "precio": "PVP",
+        "stock": "STOCK",
+        "descripcion": "DESCRIPCION",
+        "rendimiento": "RENDIMIENTO"
+    }
+
+    clave = claves.get(tipo_dato)
+    if not clave:
+        return "❌ Tipo de dato no reconocido."
+
+    respuesta = f"Se encontraron varias presentaciones con su {tipo_dato}:\n"
+    for item in productos:
+        nombre = item.get("NOMBRE", "Sin nombre")
+        valor = item.get(clave, "N/D")
+        respuesta += f"• {nombre}: {valor}\n"
+
+    return respuesta

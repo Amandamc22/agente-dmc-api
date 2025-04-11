@@ -1,5 +1,5 @@
 from read_gpt import leer_hoja_gpt
-from consulta_agente import buscar_productos
+from consulta_agente import buscar_productos, responder_varias_coincidencias
 from interprete import interpretar_consulta
 
 def responder_consulta(producto, tipo_dato):
@@ -47,10 +47,7 @@ def main():
         if len(coincidencias) == 1:
             print(responder_consulta(coincidencias[0], tipo_dato))
         else:
-            print(f"✅ Se encontraron varias presentaciones de '{producto_clave}' con su {tipo_dato}:\n")
-            for item in coincidencias:
-                clave_valor = item.get(tipo_dato.upper(), "N/D")
-                print(f"- {item['NOMBRE']}: {clave_valor}")
+            print(responder_varias_coincidencias(coincidencias, tipo_dato))
 
 if __name__ == "__main__":
     main()
