@@ -23,17 +23,17 @@ def leer_hoja_gpt():
 
     # Procesar campos sensibles como stock y precio
     for item in datos:
-        # Convertir stock a número flotante (coma -> punto)
+        # Convertir STOCK correctamente (coma decimal -> punto)
         try:
             stock_raw = str(item.get("STOCK", "")).strip().replace(",", ".")
-            item["STOCK"] = float(stock_raw)
+            item["STOCK"] = round(float(stock_raw), 2)  # redondeo a 2 decimales
         except:
             item["STOCK"] = "N/D"
 
-        # Convertir precio a número flotante (eliminar $ y comas)
+        # Convertir PVP a número limpio
         try:
             precio_raw = str(item.get("PVP", "")).replace("$", "").replace(",", "").strip()
-            item["PVP"] = float(precio_raw)
+            item["PVP"] = round(float(precio_raw), 2)
         except:
             item["PVP"] = "N/D"
 
