@@ -1,41 +1,23 @@
-def buscar_productos(clave_producto, datos):
+def buscar_productos(clave_busqueda, datos):
+    clave_busqueda = clave_busqueda.lower().strip()
     coincidencias = []
 
-    clave_lower = clave_producto.lower()
-
     for item in datos:
-        campos = [
-            item.get("NOMBRE", ""),
-            item.get("NOMBRE WEB", ""),
-            item.get("ALIAS", ""),
-            item.get("CODIGO", "")
+        nombres = [
+            item.get("NOMBRE", "").lower(),
+            item.get("NOMBRE WEB", "").lower(),
+            item.get("ALIAS", "").lower(),
         ]
-        campos_texto = " ".join([str(c).lower() for c in campos])
 
-        if clave_lower in campos_texto:
+        if any(clave_busqueda in nombre for nombre in nombres):
             coincidencias.append(item)
 
     return coincidencias
 
 
-def responder_consulta(producto, tipo_dato):
+def responder_varias_coincidencias(coincidencias, tipo_dato):
     claves = {
-        "precio": "PVP",
-        "stock": "STOCK",
-        "descripcion": "DESCRIPCION",
-        "rendimiento": "RENDIMIENTO"
-    }
-
-    clave = claves.get(tipo_dato)
-    if not clave or clave not in producto:
-        return "❌ No se puede responder esa consulta."
-
-    return f"✅ {tipo_dato.capitalize()} del producto '{producto['NOMBRE']}': {producto[clave]}"
-
-
-def responder_varias_coincidencias(productos, tipo_dato):
-    claves = {
-        "precio": "PVP",
+        "precio": "PRECIO",
         "stock": "STOCK",
         "descripcion": "DESCRIPCION",
         "rendimiento": "RENDIMIENTO"
@@ -43,12 +25,19 @@ def responder_varias_coincidencias(productos, tipo_dato):
 
     clave = claves.get(tipo_dato)
     if not clave:
-        return "❌ Tipo de dato no reconocido."
+        return f"❌ No puedo responder sobre '{tipo_dato}'."
 
-    respuesta = f"Se encontraron varias presentaciones con su {tipo_dato}:\n"
-    for item in productos:
-        nombre = item.get("NOMBRE", "Sin nombre")
-        valor = item.get(clave, "N/D")
-        respuesta += f"• {nombre}: {valor}\n"
+    respuesta = [f"✅ Se encontraron varias presentaciones con su {tipo_dato}:\n"]
 
-    return respuesta
+    for producto in coincidencias:
+        print(f"🧾 Producto: {producto}")
+        for k, v in producto.items():
+            print(f" - clave: '{k}' → valor: {v}")
+
+        valor = next(
+            (v for k, v in producto.items() if k.strip().lower() == clave.strip().lower()),
+            "N/D"
+        )
+        respuesta.append(f"- {producto.get('NOMBRE', 'Sin nombre')}: {valor}")
+
+    return "\n".join(respuesta)

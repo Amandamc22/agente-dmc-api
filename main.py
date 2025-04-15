@@ -4,17 +4,28 @@ from interprete import interpretar_consulta
 
 def responder_consulta(producto, tipo_dato):
     claves = {
-        "precio": "PVP",
+        "precio": "PRECIO",
         "stock": "STOCK",
         "descripcion": "DESCRIPCION",
         "rendimiento": "RENDIMIENTO"
     }
 
     clave = claves.get(tipo_dato)
-    if not clave or clave not in producto:
+    if not clave:
         return "❌ No se puede responder esa consulta."
 
-    return f"✅ {tipo_dato.capitalize()} del producto '{producto['NOMBRE']}': {producto[clave]}"
+    # DEPURACIÓN EN CONSOLA
+    print(f"🔍 Clave solicitada: {clave}")
+    print(f"🧾 Producto actual: {producto}")
+    print(f"🔑 Claves disponibles: {list(producto.keys())}")
+
+    for k, v in producto.items():
+        if k.strip().lower() == clave.strip().lower():
+            print(f"✅ ¡Match encontrado! clave: '{k}' → valor: {v}")
+            return f"✅ {tipo_dato.capitalize()} del producto '{producto.get('NOMBRE', 'Producto sin nombre')}': {v}"
+
+    print("❌ No se encontró la clave solicitada")
+    return f"❌ No se encontró el dato '{tipo_dato}' para el producto '{producto.get('NOMBRE', 'Producto sin nombre')}'."
 
 def main():
     datos = leer_hoja_gpt()
