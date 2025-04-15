@@ -1,7 +1,5 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import os
-import json
 
 def leer_hoja_gpt():
     scope = [
@@ -10,16 +8,13 @@ def leer_hoja_gpt():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    # Leer la credencial desde la variable de entorno en Render
-    cred_json = os.getenv("GOOGLE_SHEETS_CREDENTIALS")
-    if not cred_json:
-        raise Exception("❌ No se encontró la variable 'GOOGLE_SHEETS_CREDENTIALS'.")
+    # Ruta al archivo de credenciales (secret file)
+    cred_path = "/etc/secrets/agente-atco.json"
 
     try:
-        cred_data = json.loads(cred_json)
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(cred_data, scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name(cred_path, scope)
     except Exception as e:
-        raise Exception(f"❌ Error al procesar la credencial JSON: {e}")
+        raise Exception(f"❌ Error al cargar las credenciales desde archivo: {e}")
 
     client = gspread.authorize(creds)
 
