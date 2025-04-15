@@ -10,8 +10,17 @@ def leer_hoja_gpt():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    # Leer la credencial desde archivo secreto (Render)
-    creds = ServiceAccountCredentials.from_json_keyfile_name("/etc/secrets/agente-atco.json", scope)
+    # Leer la credencial desde la variable de entorno en Render
+    cred_json = os.getenv("GOOGLE_SHEETS_CREDENTIALS")
+    if not cred_json:
+        raise Exception("❌ No se encontró la variable 'GOOGLE_SHEETS_CREDENTIALS'.")
+
+    try:
+        cred_data = json.loads(cred_json)
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(cred_data, scope)
+    except Exception as e:
+        raise Exception(f"❌ Error al procesar la credencial JSON: {e}")
+
     client = gspread.authorize(creds)
 
     # Abre el documento y la pestaña
@@ -33,14 +42,14 @@ def leer_hoja_gpt():
         except:
             item["STOCK"] = "N/D"
 
-        # PVP
+        # PRECIO
         try:
-            valor_pvp = str(item.get("PVP", "")).strip().lower()
-            if valor_pvp in ("", "#n/a", "#ref!", "n/a"):
-                item["PVP"] = "N/D"
+            valor_precio = str(item.get("PRECIO", "")).strip().lower()
+            if valor_precio in ("", "#n/a", "#ref!", "n/a"):
+                item["PRECIO"] = "N/D"
             else:
-                item["PVP"] = round(float(valor_pvp), 2)
+                item["PRECIO"] = round(float(valor_precio), 2)
         except:
-            item["PVP"] = "N/D"
+            item["PRECIO"] = "N/D"
 
     return datos
