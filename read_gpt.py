@@ -10,43 +10,27 @@ def leer_hoja_gpt():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    # Ruta al archivo secreto en Render
-    cred_path = "/etc/secrets/agente-atco.json"
+    # Leer desde la variable de entorno
+    cred_json = os.getenv("GOOGLE_SHEETS_CREDENTIALS")
 
-    # 🔍 Diagnóstico temporal
-    if not os.path.exists(cred_path):
-        raise FileNotFoundError(f"❌ El archivo no existe en la ruta: {cred_path}")
+    if not cred_json:
+        raise Exception("❌ No se encontró la variable 'GOOGLE_SHEETS_CREDENTIALS'.")
 
     try:
-        with open(cred_path, 'r') as f:
-            contenido = f.read()
-        print("✅ Archivo leído correctamente.")
-        print("🔐 Contenido parcial (primeros 200 caracteres):")
-        print(contenido[:200])
+        cred_data = json.loads(cred_json)
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(cred_data, scope)
+        print("✅ Credenciales cargadas desde variable de entorno.")
     except Exception as e:
-        raise Exception(f"❌ Error al leer el archivo: {e}")
+        raise Exception(f"❌ Error al procesar la credencial JSON desde variable: {e}")
 
-    # Validar que sea un JSON válido
-    try:
-        json.loads(contenido)
-        print("✅ El contenido es un JSON válido.")
-    except Exception as e:
-        raise Exception(f"❌ El archivo no contiene un JSON válido: {e}")
-
-    # Autenticación con Google Sheets
-    creds = ServiceAccountCredentials.from_json_keyfile_name(cred_path, scope)
     client = gspread.authorize(creds)
 
-    # Abre el documento y la pestaña
     sheet = client.open("0. BASE GENERAL- Cotizador 2024/04/01 (Actualizar PVP)")
     worksheet = sheet.worksheet("GPT")
 
-    # Obtiene todos los registros como lista de diccionarios
     datos = worksheet.get_all_records()
 
-    # Procesar campos sensibles como stock y precio
     for item in datos:
-        # STOCK
         try:
             valor_stock = str(item.get("STOCK", "")).strip().lower()
             if valor_stock in ("", "#n/a", "#ref!", "n/a"):
@@ -56,7 +40,6 @@ def leer_hoja_gpt():
         except:
             item["STOCK"] = "N/D"
 
-        # PRECIO
         try:
             valor_precio = str(item.get("PRECIO", "")).strip().lower()
             if valor_precio in ("", "#n/a", "#ref!", "n/a"):
