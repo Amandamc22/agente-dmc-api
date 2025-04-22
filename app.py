@@ -67,5 +67,7 @@ async def consultar(pregunta: Pregunta):
             }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print("❌ ERROR GLOBAL en el endpoint consultar():", str(e))
         return {"respuesta": f"❌ Error interno global: {str(e)}"}
