@@ -2,6 +2,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
 import json
+import tempfile
 
 def leer_hoja_gpt():
     scope = [
@@ -10,7 +11,7 @@ def leer_hoja_gpt():
         "https://www.googleapis.com/auth/drive"
     ]
 
-    # Leer desde la variable de entorno
+    # Leer desde variable de entorno
     cred_json = os.getenv("GOOGLE_SHEETS_CREDENTIALS")
 
     if not cred_json:
@@ -19,13 +20,22 @@ def leer_hoja_gpt():
     try:
         print("🔐 Fragmento de cred_json (200 caracteres):")
         print(cred_json[:200])
-        cred_data = json.loads(cred_json)
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(cred_data, scope)
-        print("✅ Credenciales cargadas desde variable.")
+
+        # Guardar en archivo temporal
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as temp_file:
+            temp_file.write(cred_json)
+            temp_file.flush()
+            temp_path = temp_file.name
+
+        print(f"📁 Archivo temporal creado: {temp_path}")
+
+        # Autenticación usando el archivo temporal
+        creds = ServiceAccountCredentials.from_json_keyfile_name(temp_path, scope)
+        print("✅ Credenciales cargadas desde archivo temporal.")
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise Exception(f"❌ Error al procesar la credencial JSON desde variable: {e}")
+        raise Exception(f"❌ Error al procesar la credencial desde archivo temporal: {e}")
 
     try:
         client = gspread.authorize(creds)
