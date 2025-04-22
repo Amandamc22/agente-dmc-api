@@ -17,18 +17,26 @@ def leer_hoja_gpt():
         raise Exception("❌ No se encontró la variable 'GOOGLE_SHEETS_CREDENTIALS'.")
 
     try:
+        print("🔐 Fragmento de cred_json (200 caracteres):")
+        print(cred_json[:200])
         cred_data = json.loads(cred_json)
         creds = ServiceAccountCredentials.from_json_keyfile_dict(cred_data, scope)
-        print("✅ Credenciales cargadas desde variable de entorno.")
+        print("✅ Credenciales cargadas desde variable.")
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise Exception(f"❌ Error al procesar la credencial JSON desde variable: {e}")
 
-    client = gspread.authorize(creds)
-
-    sheet = client.open("0. BASE GENERAL- Cotizador 2024/04/01 (Actualizar PVP)")
-    worksheet = sheet.worksheet("GPT")
-
-    datos = worksheet.get_all_records()
+    try:
+        client = gspread.authorize(creds)
+        sheet = client.open("0. BASE GENERAL- Cotizador 2024/04/01 (Actualizar PVP)")
+        worksheet = sheet.worksheet("GPT")
+        datos = worksheet.get_all_records()
+        print(f"📄 Datos obtenidos desde la hoja: {len(datos)} registros")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise Exception(f"❌ Error al acceder a Google Sheets: {e}")
 
     for item in datos:
         try:
